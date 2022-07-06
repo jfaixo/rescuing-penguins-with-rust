@@ -1,0 +1,46 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "influxdb") }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 60
+  completions: 1
+  parallelism: 1
+  template:
+    spec:
+      volumes:
+        - name: scripts
+          configMap:
+            name: {{ include "green-bench.name" $parameters }}
+      restartPolicy: OnFailure
+      containers:
+      - name: influxdb-setup
+        image: "{{ .Values.influxdb.image }}"
+        command: ['sh', '/usr/src/app/influxdb-init.sh']
+        env:
+        - name: INFLUXDB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "green-bench.name" $parameters }}
+              key: INFLUXDB_PASSWORD
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "green-bench.name" $parameters }}
+              key: INFLUXDB_TOKEN
+        - name: INFLUXDB_HOST
+          value: {{ include "green-bench.name" $parameters }}
+        volumeMounts:
+        - name: scripts
+          mountPath: /usr/src/app/influxdb-init.sh
+          subPath: influxdb-init.sh
+      volumes:
+        - name: scripts
+          configMap:
+            name: {{ include "green-bench.name" $parameters }}

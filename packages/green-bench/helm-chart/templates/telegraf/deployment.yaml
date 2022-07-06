@@ -1,0 +1,29 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "telegraf") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "green-bench.selectorLabels" $parameters | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "green-bench.selectorLabels" $parameters | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "green-bench.name" $parameters }}
+          image: "{{ .Values.telegraf.image }}"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: config
+            mountPath: /etc/telegraf/telegraf.conf
+            subPath: telegraf.conf
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "green-bench.name" $parameters }}

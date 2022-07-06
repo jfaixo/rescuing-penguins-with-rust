@@ -1,0 +1,4 @@
+#cloud-config
+
+runcmd:
+ - '\curl -sfL https://get.k3s.io | INSTALL_K3S_CHANNEL=stable K3S_TOKEN=ae8j7bibjphao6kptkyd K3S_AGENT_TOKEN=grc7ymtvs2rtgtsxbqs7 INSTALL_K3S_EXEC="server --cluster-init" K3S_KUBECONFIG_MODE=644 sh -'

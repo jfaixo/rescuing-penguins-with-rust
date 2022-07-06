@@ -1,0 +1,13 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "influxdb") }}
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: {{ .Values.influxdb.storageSize | quote }}

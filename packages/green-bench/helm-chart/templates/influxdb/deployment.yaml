@@ -1,0 +1,40 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "influxdb") }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "green-bench.selectorLabels" $parameters | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "green-bench.selectorLabels" $parameters | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ include "green-bench.name" $parameters }}
+          image: "{{ .Values.influxdb.image }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: influxdb
+              containerPort: 8086
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: influxdb
+          readinessProbe:
+            httpGet:
+              path: /
+              port: influxdb
+          volumeMounts:
+          - name: data
+            mountPath: /var/lib/influxdb2
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "green-bench.name" $parameters }}

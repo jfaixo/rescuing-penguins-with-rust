@@ -1,0 +1,17 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "influxdb") }}
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - kind: Service
+          name: {{ include "green-bench.name" $parameters }}
+          port: 8086

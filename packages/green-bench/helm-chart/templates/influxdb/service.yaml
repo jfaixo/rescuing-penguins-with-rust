@@ -1,0 +1,15 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "influxdb") }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+spec:
+    ports:
+      - name: influxdb
+        port: 8086
+        targetPort: 8086
+    selector:
+      {{- include "green-bench.selectorLabels" $parameters | nindent 8 }}
+    type: ClusterIP

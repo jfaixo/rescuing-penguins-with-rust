@@ -1,0 +1,10 @@
+{{ $parameters := (dict "Release" .Release "Chart" .Chart "Name" "telegraf") }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "green-bench.name" $parameters }}
+  labels:
+    {{- include "green-bench.labels" $parameters | nindent 4 }}
+data:
+  telegraf.conf: |
+{{ .Files.Get "dist/telegraf.conf" | indent 4 }}
